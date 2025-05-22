@@ -30,3 +30,10 @@ eval "$(/where/ever/path-sanitizer -s fish $HOME /usr/local)"
 ```
 
 Wheter to use `source` or `eval` depends on your shell. Fortunately, `path-sanitizer -h` shows examples.
+
+## Installation
+
+- Clone the repo: `git clone https://github.com/KarelKubat/path-sanitizer`
+- In the obtained source tree, run `go install path-sanitizer.go`
+- Try it out: Assuming that you need to add e.g. `/usr/local/bin` to your path, run: `path-sanitizer -s zsh /usr/local`, and examine the output (this example assumes `zsh` format, adjust as needed).
+- Edit your shell's startup script as shown above.
