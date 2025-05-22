@@ -3,6 +3,7 @@
 <!-- toc -->
 - [Purpose](#purpose)
 - [Examples](#examples)
+- [Installation](#installation)
 <!-- /toc -->
 
 ## Purpose
