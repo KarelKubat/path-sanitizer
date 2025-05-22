@@ -101,5 +101,5 @@ func main() {
 
 func isdir(path string) bool {
 	fi, err := os.Stat(path)
-	return err != nil && fi.IsDir()
+	return err == nil && fi.IsDir()
 }
