@@ -12,7 +12,7 @@
 
 ## Examples
 
-Bash:
+Add to your `bash` startup script:
 
 ```shell
 # ~/.profile: Add . (dot), $HOME/bin, /usr/local/bin and /usr/local/sbin to $PATH
@@ -22,7 +22,7 @@ source <(/where/ever/path-sanitizer -s bash $HOME /usr/local)
 #                                    ^ intended shell, generates `export PATH=...`
 ```
 
-Fish:
+Add to your `fish` startup script:
 
 ```shell
 # ~/.config/fish/config.fish example
@@ -30,7 +30,7 @@ eval "$(/where/ever/path-sanitizer -s fish $HOME /usr/local)"
 #                                     ^ intended shell, generates `set -gx ...`
 ```
 
-Wheter to use `source` or `eval` depends on your shell. Fortunately, `path-sanitizer -h` shows examples.
+Wheter to use `source` or `eval` depends on your shell. Fortunately, `path-sanitizer -h` shows examples for the most common shells.
 
 ## Installation
 
