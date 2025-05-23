@@ -8,7 +8,7 @@
 
 ## Purpose
 
-`path-sanitizer` is a tiny utility to make configuring `$PATH` a bit easier in shell resource files, such as `~/.profile`, `~/.zprofile` and so on. `path-sanitizer` examines the current `$PATH` value, adds command-line stated directories to it, and sanitizes it so that there are no double entries.
+`path-sanitizer` is a tiny utility to make configuring `$PATH` a bit easier in shell resource files, such as `~/.profile`, `~/.zprofile` and so on. `path-sanitizer` examines the current `$PATH` value, adds command-line stated directories to it, and sanitizes it so that there are no double entries. The new `$PATH` setting is printed to *stdout* so that it can be evaluated in a shell startup script.
 
 ## Examples
 
