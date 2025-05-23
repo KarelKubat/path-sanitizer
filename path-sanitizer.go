@@ -38,7 +38,7 @@ Flags, which may be abbreviated (e.g. '-s' for '-shell'):
 func main() {
 	flagnames.Patch()
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, usage)
+		fmt.Fprint(os.Stderr, usage)
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -49,57 +49,92 @@ func main() {
 		log.Fatal("path-sanitizer: -shell must be one of 'bash', 'zsh' or 'fish'")
 	}
 
-	// Fetch path.
-	path := os.Getenv("PATH")
-	// fmt.Println("initial PATH:", path)
+	// Emit new PATH setting
+	fmt.Println(
+		evalString(*flagShell,
+			splitPath(
+				extendPath(os.Getenv("PATH"), *flagCurrentDir, flag.Args(), *flagPrepend))))
+}
 
-	// Add any bin/ or sbin/ paths under all args
-	for _, arg := range flag.Args() {
-		for _, sub := range []string{"bin", "sbin"} {
-			target := arg + "/" + sub
-			if !isdir(target) {
-				continue
-			}
-			if *flagPrepend {
-				path = target + ":" + path
-			} else {
-				path = path + ":" + target
+// Extends the $PATH setting with the dotdir and other new parts, either pre- or postpending
+func extendPath(path string, useDot bool, parts []string, prepend bool) string {
+	// Build up the addition to $PATH from the dotdir and all parts (so part/bin and part/sbin if such exist)
+	var extra string
+	if useDot {
+		extra = "."
+	}
+	for _, arg := range parts {
+		for _, bindir := range []string{arg + "/bin", arg + "/sbin"} {
+			if isDir(bindir) {
+				extra += ":" + bindir
 			}
 		}
 	}
 
-	// Remove duplicates and clean up
+	// Add the path
+	if prepend {
+		path = extra + ":" + path
+	} else {
+		path += ":" + extra
+	}
+
+	// Avoid double/triple/etc slashes and double/triple/etc/leading/trailing colons
+	for strings.Contains(path, "//") {
+		path = strings.Replace(path, "//", "/", -1)
+	}
+	for strings.Contains(path, "::") {
+		path = strings.Replace(path, "::", ":", -1)
+	}
+	for strings.HasPrefix(path, ":") {
+		path = strings.TrimPrefix(path, ":")
+	}
+	for strings.HasSuffix(path, ":") {
+		path = strings.TrimSuffix(path, ":")
+	}
+
+	return path
+}
+
+// Split and deduplicate the parts in a $PATH setting.
+func splitPath(path string) []string {
 	parts := strings.Split(path, ":")
-	// fmt.Println("initial parts:", parts)
 	newparts := []string{}
+	hit := map[string]struct{}{
+		"": {}, // avoid empty parts
+	}
 	for i, part := range parts {
-		if part == "" {
+		// avoid parts that we already had
+		if _, ok := hit[part]; ok {
 			continue
 		}
+		hit[part] = struct{}{}
 		for j := i + 1; j < len(parts); j++ {
 			if parts[i] == parts[j] {
 				continue
 			}
 		}
 		newparts = append(newparts, part)
-		// fmt.Println("appended", part, "now it's", newparts)
 	}
+	return newparts
+}
 
-	// Emit new PATH setting
-	path = strings.Join(newparts, ":")
-	switch *flagShell {
+// Generate a string that a shell can evaluate.
+func evalString(shell string, parts []string) string {
+	path := strings.Join(parts, ":")
+	switch shell {
 	case "bash":
 		fallthrough
 	case "zsh":
-		fmt.Printf("export PATH=\"%s\"\n", path)
+		return fmt.Sprintf(`export PATH="%s"`, path)
 	case "fish":
-		fmt.Printf("set -gx PATH \"%s\"\n", path)
+		return fmt.Sprintf(`set -gx PATH "%s"`, path)
 	default:
 		panic("path-sanitizer: shelltype selection failure")
 	}
 }
 
-func isdir(path string) bool {
+// Return true when a filepath is a directory.
+func isDir(path string) bool {
 	fi, err := os.Stat(path)
 	return err == nil && fi.IsDir()
 }
