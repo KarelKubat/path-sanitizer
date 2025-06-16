@@ -13,7 +13,7 @@ import (
 var (
 	flagCurrentDir = flag.Bool("current-dir", true, "when true, ensure current directory (dot) is in $PATH")
 	flagPrepend    = flag.Bool("prepend", true, "when true, prepend to $PATH, otherwise append")
-	flagShell      = flag.String("shell", "", "shell type: one of 'bash'`, 'zsh' or 'fish'")
+	flagShell      = flag.String("shell", "", "shell type: one of 'bash', 'zsh' or 'fish'")
 )
 
 const (
@@ -43,6 +43,11 @@ func main() {
 		os.Exit(1)
 	}
 	flag.Parse()
+
+	// No args? Print usage.
+	if len(os.Args) == 1 {
+		flag.Usage()
+	}
 
 	// Shell must be given.
 	if *flagShell != "bash" && *flagShell != "zsh" && *flagShell != "fish" {
